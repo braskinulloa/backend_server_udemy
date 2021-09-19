@@ -15,7 +15,11 @@ const mdAutenticacion = require('../middlewares/autenticacion');
  * Obtener todos los usuarios
  */
 app.get('/', (req, res, next)=>{
+    const desde = req.params.desde || 0;
+    const hasta = req.params.hasta || 5;
     Usuario.find({}, 'nombre email img role')
+        .skip(desde)
+        .limit(hasta)
         .exec(
             (error, usuarios) => {
             if (error) {
@@ -25,9 +29,12 @@ app.get('/', (req, res, next)=>{
                     errors: error
                 });
             }
-            return res.status(200).json({
-                ok: true,
-                usuarios: usuarios
+            Usuario.count({}, (err, cont) => {
+                return res.status(200).json({
+                    ok: true,
+                    usuarios: usuarios,
+                    total: cont
+                });
             });
         });
 });
